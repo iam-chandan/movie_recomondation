@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Movie Recommender</title>
+    <style>
+      .poster {
+        width: 200px;
+        height: auto;
+        margin: 10px;
+      }
+      .movie-container {
+        display: flex;
+        gap: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Movie Recommender System</h1>
+
+    <form method="POST">
+      {% csrf_token %}
+      <label for="movie">Enter a movie name:</label>
+      <input
+        type="text"
+        name="movie"
+        id="movie"
+        value="{{ selected_movie|default:'' }}"
+        placeholder="e.g. Inception"
+        list="movie-list"
+        required
+      />
+
+      <!-- Optional: Datalist for auto-suggestions -->
+      <datalist id="movie-list">
+        {% for movie in movies %}
+        <option value="{{ movie }}">{% endfor %}</option>
+      </datalist>
+
+      <button type="submit">Recommend</button>
+    </form>
+
+    {% if recommended %}
+    <h2>Recommended Movies:</h2>
+    <div class="movie-container">
+      {% for name, poster in recommended %}
+      <div>
+        <img src="{{ poster }}" alt="{{ name }}" class="poster" />
+        <p>{{ name }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </body>
+</html>
