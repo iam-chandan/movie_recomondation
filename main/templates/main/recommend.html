@@ -3,21 +3,93 @@
   <head>
     <title>Movie Recommender</title>
     <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
+
+      h1 {
+        text-align: center;
+        color: #4caf50;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      label {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+      }
+
+      input[type="text"] {
+        padding: 10px;
+        font-size: 1em;
+        width: 300px;
+        margin-bottom: 10px;
+      }
+
+      button {
+        padding: 10px 20px;
+        font-size: 1em;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        background-color: #999;
+        cursor: not-allowed;
+      }
+
+      #loader {
+        display: none;
+        text-align: center;
+        margin: 30px;
+      }
+
+      .movie-results {
+        display: none;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
       .poster {
         width: 200px;
         height: auto;
         margin: 10px;
+        border-radius: 8px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
       }
+
       .movie-container {
         display: flex;
+        flex-wrap: wrap;
         gap: 20px;
+        justify-content: center;
+      }
+
+      .movie-card {
+        text-align: center;
       }
     </style>
   </head>
   <body>
     <h1>Movie Recommender System</h1>
 
-    <form method="POST">
+    <form method="POST" id="recommend-form">
       {% csrf_token %}
       <label for="movie">Enter a movie name:</label>
       <input
@@ -29,26 +101,65 @@
         list="movie-list"
         required
       />
-
-      <!-- Optional: Datalist for auto-suggestions -->
       <datalist id="movie-list">
         {% for movie in movies %}
         <option value="{{ movie }}">{% endfor %}</option>
       </datalist>
 
-      <button type="submit">Recommend</button>
+      <button type="submit" id="submit-btn">Recommend</button>
     </form>
 
-    {% if recommended %}
-    <h2>Recommended Movies:</h2>
-    <div class="movie-container">
-      {% for name, poster in recommended %}
-      <div>
-        <img src="{{ poster }}" alt="{{ name }}" class="poster" />
-        <p>{{ name }}</p>
-      </div>
-      {% endfor %}
+    <!-- Loader -->
+    <div id="loader">
+      <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading..." width="100" />
+      <p>Loading recommendations...</p>
     </div>
-    {% endif %}
+
+    <!-- Results -->
+    <div class="movie-results">
+      {% if selected_movie %}
+      <h2>Searched Movie:</h2>
+      <div class="movie-container">
+        <div class="movie-card">
+          <img
+            src="{{ selected_movie_poster }}"
+            alt="{{ selected_movie }}"
+            class="poster"
+          />
+          <p><strong>{{ selected_movie }}</strong></p>
+        </div>
+      </div>
+      {% endif %} {% if recommended %}
+      <h2>Recommended Movies:</h2>
+      <div class="movie-container">
+        {% for name, poster in recommended %}
+        <div class="movie-card">
+          <img src="{{ poster }}" alt="{{ name }}" class="poster" />
+          <p>{{ name }}</p>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <script>
+      const form = document.getElementById("recommend-form");
+      const loader = document.getElementById("loader");
+      const results = document.querySelector(".movie-results");
+      const submitBtn = document.getElementById("submit-btn");
+
+      form.addEventListener("submit", function () {
+        loader.style.display = "block";
+        results.style.display = "none";
+        submitBtn.disabled = true;
+      });
+
+      window.addEventListener("DOMContentLoaded", function () {
+        if (results.innerHTML.trim() !== "") {
+          loader.style.display = "none";
+          results.style.display = "block";
+        }
+      });
+    </script>
   </body>
 </html>
